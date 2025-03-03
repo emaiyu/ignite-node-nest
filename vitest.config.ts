@@ -17,9 +17,19 @@ export default defineConfig({
 		}),
 	],
 	resolve: {
-		alias: {
-			// Ensure Vitest correctly resolves TypeScript path aliases
-			src: resolve(__dirname, './src'),
-		},
+		// alias: {
+		// 	// Ensure Vitest correctly resolves TypeScript path aliases
+		// 	src: resolve(__dirname, './src'),
+		// },
+		alias: [
+			{
+				find: '@',
+				replacement: resolve(__dirname, './src'),
+			},
+			{
+				find: '@',
+				replacement: resolve(__dirname, './test'),
+			},
+		],
 	},
 });

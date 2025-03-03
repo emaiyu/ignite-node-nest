@@ -22,7 +22,7 @@ export class CreateQuestionController {
 	async handle(
 		@Body(new ZodValidationPipe(BodySchema)) body: BodyPayload,
 		@CurrentUser() user: UserPayload,
-	) {
+	): Promise<void> {
 		const { content, title } = body;
 		const userId = user.sub;
 

@@ -12,11 +12,11 @@ export class PrismaService
 		});
 	}
 
-	onModuleDestroy() {
+	onModuleDestroy(): Promise<void> {
 		return this.$disconnect();
 	}
 
-	onModuleInit() {
+	onModuleInit(): Promise<void> {
 		return this.$connect();
 	}
 }

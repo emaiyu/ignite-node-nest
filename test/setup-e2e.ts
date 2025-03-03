@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 
 const prisma = new PrismaClient();
 
-function generateUniqueDatabaseURL(schemaId: string) {
+function generateUniqueDatabaseURL(schemaId: string): string {
 	if (!process.env.DATABASE_URL) {
 		throw new Error('Please provide a DATABASE_URL environment variable');
 	}
@@ -17,7 +17,7 @@ function generateUniqueDatabaseURL(schemaId: string) {
 
 const schemaId = randomUUID();
 
-beforeAll(async () => {
+beforeAll(() => {
 	const databaseURL = generateUniqueDatabaseURL(schemaId);
 	process.env.DATABASE_URL = databaseURL;
 	execSync('npx prisma migrate deploy');

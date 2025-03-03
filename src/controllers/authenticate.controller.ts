@@ -27,7 +27,9 @@ export class AuthenticateController {
 	) {}
 
 	@Post()
-	async handle(@Body() body: BodyPayload) {
+	async handle(@Body() body: BodyPayload): Promise<{
+		access_token: string;
+	}> {
 		const { email, password } = body;
 		const user = await this.prisma.user.findUnique({
 			where: {

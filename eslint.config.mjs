@@ -40,17 +40,6 @@ export default tseslint.config(
 					allowTypedFunctionExpressions: true,
 				},
 			],
-			'import/order': [
-				'error',
-				{
-					alphabetize: {
-						order: 'asc',
-						caseInsensitive: true,
-					},
-					groups: [['builtin', 'external'], 'internal', 'parent', 'sibling'],
-					'newlines-between': 'always',
-				},
-			],
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-floating-promises': 'warn',
 			'@typescript-eslint/no-unsafe-argument': 'warn',

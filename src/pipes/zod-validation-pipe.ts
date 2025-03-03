@@ -1,9 +1,11 @@
-import {
-	ArgumentMetadata,
-	BadRequestException,
-	PipeTransform,
-} from '@nestjs/common';
-import { ZodError, ZodSchema } from 'zod';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import type { ArgumentMetadata, PipeTransform } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
+import type { ZodSchema } from 'zod';
+import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
 export class ZodValidationPipe implements PipeTransform {
