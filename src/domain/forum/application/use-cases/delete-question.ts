@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 import type { Either } from '@/core/either';
 import { left, right } from '@/core/either';
 import { NotAllowedError } from '@/core/errors/not-allowed';
@@ -11,7 +10,10 @@ interface DeleteQuestionPayload {
 	questionId: string;
 }
 
-type DeleteQuestionResult = Either<ResourceNotFoundError | NotAllowedError, {}>;
+type DeleteQuestionResult = Either<
+	ResourceNotFoundError | NotAllowedError,
+	null
+>;
 
 export class DeleteQuestionUseCase {
 	constructor(private questionRepository: QuestionRepository) {}
@@ -21,6 +23,6 @@ export class DeleteQuestionUseCase {
 		if (question.authorId.toString() !== payload.authorId)
 			return left(new NotAllowedError());
 		await this.questionRepository.delete(question);
-		return right({});
+		return right(null);
 	}
 }

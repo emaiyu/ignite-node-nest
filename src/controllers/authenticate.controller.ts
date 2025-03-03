@@ -1,4 +1,3 @@
-import { ZodValidationPipe } from '@/pipes/zod-validation-pipe';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
 	Body,
@@ -10,6 +9,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 
 const BodySchema = z.object({
 	email: z.string(),

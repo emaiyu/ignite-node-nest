@@ -46,10 +46,16 @@ export default tseslint.config(
 		},
 	},
 	{
+		// Configuração para o plugin de importação
+		plugins: {},
 		settings: {
 			'import/resolver': {
 				typescript: {
+					alwaysTryTypes: true,
 					project: './tsconfig.json',
+				},
+				node: {
+					extensions: ['.js', '.jsx', '.ts', '.tsx'],
 				},
 			},
 		},

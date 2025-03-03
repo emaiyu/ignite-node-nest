@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 import type { Either } from '@/core/either';
 import { left, right } from '@/core/either';
 import { NotAllowedError } from '@/core/errors/not-allowed';
@@ -13,7 +12,7 @@ interface DeleteAnswerCommentPayload {
 
 type DeleteAnswerCommentResult = Either<
 	ResourceNotFoundError | NotAllowedError,
-	{}
+	null
 >;
 
 export class DeleteAnswerCommentUseCase {
@@ -32,6 +31,6 @@ export class DeleteAnswerCommentUseCase {
 
 		await this.answerCommentRepository.delete(answerComment);
 
-		return right({});
+		return right(null);
 	}
 }
