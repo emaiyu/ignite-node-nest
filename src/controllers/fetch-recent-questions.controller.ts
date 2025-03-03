@@ -17,12 +17,13 @@ type PageQueryParam = z.infer<typeof pageQueryParamSchema>;
 @UseGuards(JwtAuthGuard)
 export class FetchRecentQuestionsController {
 	constructor(private readonly prisma: PrismaService) {}
+
 	@Get()
 	async handle(
 		@Query('page', new ZodValidationPipe(pageQueryParamSchema))
 		page: PageQueryParam,
 	) {
-		const perPage = 1;
+		const perPage = 20;
 		const questions = await this.prisma.question.findMany({
 			take: perPage,
 			skip: (page - 1) * perPage,

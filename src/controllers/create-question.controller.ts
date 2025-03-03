@@ -17,6 +17,7 @@ type BodyPayload = z.infer<typeof BodySchema>;
 @UseGuards(JwtAuthGuard)
 export class CreateQuestionController {
 	constructor(private readonly prisma: PrismaService) {}
+
 	@Post()
 	async handle(
 		@Body(new ZodValidationPipe(BodySchema)) body: BodyPayload,
