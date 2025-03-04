@@ -1,10 +1,11 @@
-import { right, type Either } from '@/core/either';
+import { Either, right } from '@/core/either';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 
+import { Injectable } from '@nestjs/common';
 import { Question } from '../../enterprise/entities/question';
 import { QuestionAttachment } from '../../enterprise/entities/question-attachment';
 import { QuestionAttachmentList } from '../../enterprise/entities/question-attachment-list';
-import type { QuestionRepository } from '../repositories/question-repository';
+import { QuestionRepository } from '../repositories/question-repository';
 
 interface CreateQuestionPayload {
 	authorId: string;
@@ -20,6 +21,7 @@ type CreateQuestionResult = Either<
 	}
 >;
 
+@Injectable()
 export class CreateQuestionUseCase {
 	constructor(private questionRepository: QuestionRepository) {}
 	async execute(payload: CreateQuestionPayload): Promise<CreateQuestionResult> {

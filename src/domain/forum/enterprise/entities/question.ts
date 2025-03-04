@@ -11,13 +11,13 @@ import { Slug } from './value-objects/slug';
 
 interface Props {
 	authorId: UniqueEntityId;
-	bestAnswerId?: UniqueEntityId;
+	bestAnswerId?: UniqueEntityId | null;
 	title: string;
 	content: string;
 	slug: Slug;
 	attachments: QuestionAttachmentList;
 	createdAt: Date;
-	updatedAt?: Date;
+	updatedAt?: Date | null;
 }
 
 export class Question extends AggregateRoot<Props> {
@@ -25,7 +25,7 @@ export class Question extends AggregateRoot<Props> {
 		return this.props.authorId;
 	}
 
-	get bestAnswerId(): UniqueEntityId | undefined {
+	get bestAnswerId(): UniqueEntityId | undefined | null {
 		return this.props.bestAnswerId;
 	}
 
@@ -49,7 +49,7 @@ export class Question extends AggregateRoot<Props> {
 		return this.props.createdAt;
 	}
 
-	get updatedAt(): Date | undefined {
+	get updatedAt(): Date | undefined | null {
 		return this.props.updatedAt;
 	}
 
@@ -81,12 +81,12 @@ export class Question extends AggregateRoot<Props> {
 		this.touch();
 	}
 
-	set bestAnswerId(bestAnswerId: UniqueEntityId | undefined) {
-		if (bestAnswerId === undefined) return;
+	set bestAnswerId(bestAnswerId: UniqueEntityId | undefined | null) {
+		if (bestAnswerId === undefined || bestAnswerId === null) return;
 
 		if (
 			this.props.bestAnswerId === undefined ||
-			!this.props.bestAnswerId.equals(bestAnswerId)
+			!this?.props?.bestAnswerId?.equals(bestAnswerId)
 		) {
 			this.addDomainEvent(
 				new QuestionBestAnswerChosenEvent(this, bestAnswerId),
