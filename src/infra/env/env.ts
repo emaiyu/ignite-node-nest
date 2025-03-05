@@ -11,6 +11,11 @@ export const EnvSchema = z.object({
 	DB_DATABASE: z.string(),
 	DB_PORT: z.coerce.number().default(5432),
 
+	STORAGE_ACCOUNT_ID: z.string(),
+	STORAGE_BUCKET_NAME: z.string(),
+	STORAGE_ACCESS_KEY_ID: z.string(),
+	STORAGE_SECRET_ACCESS_KEY: z.string(),
+
 	PORT: z.coerce.number().default(3333),
 });
 

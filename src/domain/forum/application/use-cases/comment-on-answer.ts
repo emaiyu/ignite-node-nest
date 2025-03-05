@@ -3,9 +3,10 @@ import { left, right } from '@/core/either';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { NotAllowedError } from '@/core/errors/not-allowed';
 
+import { Injectable } from '@nestjs/common';
 import { AnswerComment } from '../../enterprise/entities/answer-comment';
-import type { AnswerCommentRepository } from '../repositories/answer-comment-repository';
-import type { AnswerRepository } from '../repositories/answer-repository';
+import { AnswerCommentRepository } from '../repositories/answer-comment-repository';
+import { AnswerRepository } from '../repositories/answer-repository';
 
 interface CommentOnAnswerPayload {
 	authorId: string;
@@ -18,6 +19,7 @@ type CommentOnAnswerResult = Either<
 	{ answerComment: AnswerComment }
 >;
 
+@Injectable()
 export class CommentOnAnswerUseCase {
 	constructor(
 		private answerRepository: AnswerRepository,

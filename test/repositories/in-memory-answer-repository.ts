@@ -10,48 +10,58 @@ export class InMemoryAnswerRepository implements AnswerRepository {
 	constructor(private answerAttachmentRepository: AnswerAttachmentRepository) {}
 
 	async findById(id: string): Promise<Answer | null> {
-		const answer = this.items.find(
-			(item) => item.id.toString() === id?.toString(),
-		);
-		if (!answer) return null;
+		const answer = this.items.find((item) => item.id.toString() === id);
+
+		if (!answer) {
+			return null;
+		}
+
 		return Promise.resolve(answer);
 	}
 
 	async findManyByQuestionId(
 		questionId: string,
-		params: PaginationParams,
+		{ page }: PaginationParams,
 	): Promise<Answer[]> {
 		const answers = this.items
 			.filter((item) => item.questionId.toString() === questionId)
-			.slice((params.page - 1) * 20, params.page * 20);
+			.slice((page - 1) * 20, page * 20);
+
 		return Promise.resolve(answers);
 	}
 
 	async create(answer: Answer): Promise<void> {
 		this.items.push(answer);
+
+		await this.answerAttachmentRepository.createMany(
+			answer.attachments.getItems(),
+		);
+
 		DomainEvents.dispatchEventsForAggregate(answer.id);
-		return Promise.resolve();
 	}
 
 	async save(answer: Answer): Promise<void> {
-		const itemIndex = this.items.findIndex(
-			(item) => item.id.toString() === answer.id.toString(),
-		);
+		const itemIndex = this.items.findIndex((item) => item.id === answer.id);
 
 		this.items[itemIndex] = answer;
+
+		await this.answerAttachmentRepository.createMany(
+			answer.attachments.getNewItems(),
+		);
+
+		await this.answerAttachmentRepository.deleteMany(
+			answer.attachments.getRemovedItems(),
+		);
+
 		DomainEvents.dispatchEventsForAggregate(answer.id);
-		return Promise.resolve();
 	}
 
 	async delete(answer: Answer): Promise<void> {
-		const itemIndex = this.items.findIndex(
-			(item) => item.id.toString() === answer.id.toString(),
-		);
+		const itemIndex = this.items.findIndex((item) => item.id === answer.id);
 
 		this.items.splice(itemIndex, 1);
 		await this.answerAttachmentRepository.deleteManyByAnswerId(
 			answer.id.toString(),
 		);
-		return Promise.resolve();
 	}
 }

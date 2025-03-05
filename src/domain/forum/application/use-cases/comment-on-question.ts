@@ -3,9 +3,10 @@ import { left, right } from '@/core/either';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found';
 
+import { Injectable } from '@nestjs/common';
 import { QuestionComment } from '../../enterprise/entities/question-comment';
-import type { QuestionCommentRepository } from '../repositories/question-comment-repository';
-import type { QuestionRepository } from '../repositories/question-repository';
+import { QuestionCommentRepository } from '../repositories/question-comment-repository';
+import { QuestionRepository } from '../repositories/question-repository';
 
 interface CommentOnQuestionPayload {
 	authorId: string;
@@ -20,6 +21,7 @@ type CommentOnQuestionResult = Either<
 	}
 >;
 
+@Injectable()
 export class CommentOnQuestionUseCase {
 	constructor(
 		private questionRepository: QuestionRepository,

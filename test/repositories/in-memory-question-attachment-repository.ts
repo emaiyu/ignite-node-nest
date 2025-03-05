@@ -9,18 +9,34 @@ export class InMemoryQuestionAttachmentRepository
 	async findManyByQuestionId(
 		questionId: string,
 	): Promise<QuestionAttachment[]> {
-		const QuestionAttachments = this.items.filter(
+		const questionAttachments = this.items.filter(
 			(item) => item.questionId.toString() === questionId,
 		);
 
-		return Promise.resolve(QuestionAttachments);
+		return Promise.resolve(questionAttachments);
+	}
+
+	async createMany(attachments: QuestionAttachment[]): Promise<void> {
+		this.items.push(...attachments);
+		return Promise.resolve();
+	}
+
+	async deleteMany(attachments: QuestionAttachment[]): Promise<void> {
+		const questionAttachments = this.items.filter((item) => {
+			return !attachments.some((attachment) => attachment.equals(item));
+		});
+
+		this.items = questionAttachments;
+		return Promise.resolve();
 	}
 
 	async deleteManyByQuestionId(questionId: string): Promise<void> {
 		const questionAttachments = this.items.filter(
 			(item) => item.questionId.toString() !== questionId,
 		);
+
 		this.items = questionAttachments;
+
 		return Promise.resolve();
 	}
 }

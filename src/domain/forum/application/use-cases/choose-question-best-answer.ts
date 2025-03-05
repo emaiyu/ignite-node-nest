@@ -2,30 +2,32 @@ import { left, right, type Either } from '@/core/either';
 import { NotAllowedError } from '@/core/errors/not-allowed';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found';
 
+import { Injectable } from '@nestjs/common';
 import type { Question } from '../../enterprise/entities/question';
-import type { AnswerRepository } from '../repositories/answer-repository';
-import type { QuestionRepository } from '../repositories/question-repository';
+import { AnswerRepository } from '../repositories/answer-repository';
+import { QuestionRepository } from '../repositories/question-repository';
 
-interface ChooseQuestionBestAnswerQuestionPayload {
+interface ChooseQuestionBestAnswerPayload {
 	answerId: string;
 	authorId: string;
 }
 
-type ChooseQuestionBestAnswerQuestionResult = Either<
+type ChooseQuestionBestAnswerResult = Either<
 	ResourceNotFoundError | NotAllowedError,
 	{
 		question: Question;
 	}
 >;
 
-export class ChooseQuestionBestAnswerQuestionUseCase {
+@Injectable()
+export class ChooseQuestionBestAnswerUseCase {
 	constructor(
 		private questionRepository: QuestionRepository,
 		private answerRepository: AnswerRepository,
 	) {}
 	async execute(
-		payload: ChooseQuestionBestAnswerQuestionPayload,
-	): Promise<ChooseQuestionBestAnswerQuestionResult> {
+		payload: ChooseQuestionBestAnswerPayload,
+	): Promise<ChooseQuestionBestAnswerResult> {
 		const answer = await this.answerRepository.findById(payload.answerId);
 		if (!answer) return left(new ResourceNotFoundError());
 

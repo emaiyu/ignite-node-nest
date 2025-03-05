@@ -9,13 +9,13 @@ import { InMemoryAnswerRepository } from '@/repositories/in-memory-answer-reposi
 import { InMemoryQuestionAttachmentRepository } from '@/repositories/in-memory-question-attachment-repository';
 import { InMemoryQuestionRepository } from '@/repositories/in-memory-question-repository';
 
-import { ChooseQuestionBestAnswerQuestionUseCase } from './choose-question-best-answer';
+import { ChooseQuestionBestAnswerUseCase } from './choose-question-best-answer';
 
 let answerRepository: InMemoryAnswerRepository;
 let answerAttachmentRepository: InMemoryAnswerAttachmentRepository;
 let questionRepository: InMemoryQuestionRepository;
 let questionAttachmentRepository: InMemoryQuestionAttachmentRepository;
-let sut: ChooseQuestionBestAnswerQuestionUseCase;
+let sut: ChooseQuestionBestAnswerUseCase;
 
 describe('Choose Question Best Answer', function () {
 	beforeEach(function () {
@@ -25,7 +25,7 @@ describe('Choose Question Best Answer', function () {
 		questionRepository = new InMemoryQuestionRepository(
 			questionAttachmentRepository,
 		);
-		sut = new ChooseQuestionBestAnswerQuestionUseCase(
+		sut = new ChooseQuestionBestAnswerUseCase(
 			questionRepository,
 			answerRepository,
 		);

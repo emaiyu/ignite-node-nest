@@ -3,7 +3,8 @@ import { left, right } from '@/core/either';
 import { NotAllowedError } from '@/core/errors/not-allowed';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found';
 
-import type { QuestionRepository } from '../repositories/question-repository';
+import { Injectable } from '@nestjs/common';
+import { QuestionRepository } from '../repositories/question-repository';
 
 interface DeleteQuestionPayload {
 	authorId: string;
@@ -15,6 +16,7 @@ type DeleteQuestionResult = Either<
 	null
 >;
 
+@Injectable()
 export class DeleteQuestionUseCase {
 	constructor(private questionRepository: QuestionRepository) {}
 	async execute(payload: DeleteQuestionPayload): Promise<DeleteQuestionResult> {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthenticationModule } from './authentication/authentication.module';
-import { EnvSchema } from './env';
+import { EnvSchema } from './env/env';
 import { HttpModule } from './http/http.module';
 
 @Module({

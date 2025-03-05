@@ -5,10 +5,11 @@ import { NotAllowedError } from '@/core/errors/not-allowed';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found';
 import type { Question } from '@/domain/forum/enterprise/entities/question';
 
+import { Injectable } from '@nestjs/common';
 import { QuestionAttachment } from '../../enterprise/entities/question-attachment';
 import { QuestionAttachmentList } from '../../enterprise/entities/question-attachment-list';
-import type { QuestionAttachmentRepository } from '../repositories/question-attachment-repository';
-import type { QuestionRepository } from '../repositories/question-repository';
+import { QuestionAttachmentRepository } from '../repositories/question-attachment-repository';
+import { QuestionRepository } from '../repositories/question-repository';
 
 interface EditQuestionPayload {
 	authorId: string;
@@ -25,6 +26,7 @@ type EditQuestionResult = Either<
 	}
 >;
 
+@Injectable()
 export class EditQuestionUseCase {
 	constructor(
 		private questionRepository: QuestionRepository,

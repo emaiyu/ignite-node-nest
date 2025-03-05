@@ -1,13 +1,14 @@
 import { right, type Either } from '@/core/either';
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 
+import { Injectable } from '@nestjs/common';
 import { Answer } from '../../enterprise/entities/answer';
 import { AnswerAttachment } from '../../enterprise/entities/answer-attachment';
 import { AnswerAttachmentList } from '../../enterprise/entities/answer-attachment-list';
-import type { AnswerRepository } from '../repositories/answer-repository';
+import { AnswerRepository } from '../repositories/answer-repository';
 
 interface AnswerQuestionPayload {
-	instructorId: string;
+	authorId: string;
 	questionId: string;
 	content: string;
 	attachmentsId: string[];
@@ -20,12 +21,13 @@ type AnswerQuestionResult = Either<
 	}
 >;
 
+@Injectable()
 export class AnswerQuestionUseCase {
 	constructor(private answerRepository: AnswerRepository) {}
 	async execute(payload: AnswerQuestionPayload): Promise<AnswerQuestionResult> {
 		const answer = Answer.create({
 			content: payload.content,
-			authorId: new UniqueEntityId(payload.instructorId),
+			authorId: new UniqueEntityId(payload.authorId),
 			questionId: new UniqueEntityId(payload.questionId),
 		});
 

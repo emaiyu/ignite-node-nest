@@ -30,3 +30,5 @@ export class Student extends Entity<Props> {
 		return student;
 	}
 }
+
+export { Props as StudentProps };
