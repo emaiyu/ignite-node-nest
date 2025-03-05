@@ -1,10 +1,9 @@
-import type { Either } from '@/core/either';
-import { left, right } from '@/core/either';
+import { Either, left, right } from '@/core/either';
 import { NotAllowedError } from '@/core/errors/not-allowed';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found';
-
-import type { Notification } from '../../enterprise/entities/notification';
-import type { NotificationRepository } from '../repositories/notification-repository';
+import { Injectable } from '@nestjs/common';
+import { Notification } from '../../enterprise/entities/notification';
+import { NotificationRepository } from '../repositories/notification-repository';
 
 interface ReadNotificationUseCaseRequest {
 	recipientId: string;
@@ -18,24 +17,29 @@ type ReadNotificationUseCaseResponse = Either<
 	}
 >;
 
+@Injectable()
 export class ReadNotificationUseCase {
-	constructor(private notificationRepository: NotificationRepository) {}
+	constructor(private notificationsRepository: NotificationRepository) {}
 
 	async execute({
 		recipientId,
 		notificationId,
 	}: ReadNotificationUseCaseRequest): Promise<ReadNotificationUseCaseResponse> {
 		const notification =
-			await this.notificationRepository.findById(notificationId);
+			await this.notificationsRepository.findById(notificationId);
 
-		if (!notification) return left(new ResourceNotFoundError());
+		if (!notification) {
+			return left(new ResourceNotFoundError());
+		}
 
-		if (recipientId !== notification.recipientId.toString())
+		if (recipientId !== notification.recipientId.toString()) {
 			return left(new NotAllowedError());
+		}
 
 		notification.read();
 
-		await this.notificationRepository.save(notification);
+		await this.notificationsRepository.save(notification);
+
 		return right({ notification });
 	}
 }

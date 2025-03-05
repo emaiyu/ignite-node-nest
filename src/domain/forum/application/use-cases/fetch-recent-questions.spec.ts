@@ -1,48 +1,45 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import { makeQuestion } from '@/factories/make-question';
+import { InMemoryAttachmentRepository } from '@/repositories/in-memory-attachment-repository';
 import { InMemoryQuestionAttachmentRepository } from '@/repositories/in-memory-question-attachment-repository';
 import { InMemoryQuestionRepository } from '@/repositories/in-memory-question-repository';
-
+import { InMemoryStudentRepository } from '@/repositories/in-memory-student-repository';
+import { makeQuestion } from 'test/factories/make-question';
 import { FetchRecentQuestionUseCase } from './fetch-recent-questions';
 
-let questionRepository: InMemoryQuestionRepository;
-let questionAttachmentRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryQuestionsRepository: InMemoryQuestionRepository;
+let inMemoryAttachmentsRepository: InMemoryAttachmentRepository;
+let inMemoryStudentsRepository: InMemoryStudentRepository;
 let sut: FetchRecentQuestionUseCase;
 
-describe('Fetch Recent Question', function () {
-	beforeEach(function () {
-		questionAttachmentRepository = new InMemoryQuestionAttachmentRepository();
-		questionRepository = new InMemoryQuestionRepository(
-			questionAttachmentRepository,
+describe('Fetch Recent Questions', () => {
+	beforeEach(() => {
+		inMemoryQuestionAttachmentsRepository =
+			new InMemoryQuestionAttachmentRepository();
+		inMemoryAttachmentsRepository = new InMemoryAttachmentRepository();
+		inMemoryStudentsRepository = new InMemoryStudentRepository();
+		inMemoryQuestionsRepository = new InMemoryQuestionRepository(
+			inMemoryQuestionAttachmentsRepository,
+			inMemoryAttachmentsRepository,
+			inMemoryStudentsRepository,
 		);
-		sut = new FetchRecentQuestionUseCase(questionRepository);
+		sut = new FetchRecentQuestionUseCase(inMemoryQuestionsRepository);
 	});
 
-	it('should be able to fetch recent question', async () => {
-		await questionRepository.create(
-			makeQuestion({
-				createdAt: new Date(2022, 0, 20),
-			}),
+	it('should be able to fetch recent questions', async () => {
+		await inMemoryQuestionsRepository.create(
+			makeQuestion({ createdAt: new Date(2022, 0, 20) }),
 		);
-		await questionRepository.create(
-			makeQuestion({
-				createdAt: new Date(2022, 0, 18),
-			}),
+		await inMemoryQuestionsRepository.create(
+			makeQuestion({ createdAt: new Date(2022, 0, 18) }),
 		);
-		await questionRepository.create(
-			makeQuestion({
-				createdAt: new Date(2022, 0, 23),
-			}),
+		await inMemoryQuestionsRepository.create(
+			makeQuestion({ createdAt: new Date(2022, 0, 23) }),
 		);
 
 		const result = await sut.execute({
 			page: 1,
 		});
 
-		expect(result.isRight()).toBe(true);
-
-		expect(result.value?.questions).toHaveLength(3);
 		expect(result.value?.questions).toEqual([
 			expect.objectContaining({ createdAt: new Date(2022, 0, 23) }),
 			expect.objectContaining({ createdAt: new Date(2022, 0, 20) }),
@@ -50,16 +47,15 @@ describe('Fetch Recent Question', function () {
 		]);
 	});
 
-	it('should be able to fetch paginated recent question', async () => {
+	it('should be able to fetch paginated recent questions', async () => {
 		for (let i = 1; i <= 22; i++) {
-			await questionRepository.create(makeQuestion({}));
+			await inMemoryQuestionsRepository.create(makeQuestion());
 		}
 
 		const result = await sut.execute({
 			page: 2,
 		});
 
-		expect(result.isRight()).toBe(true);
 		expect(result.value?.questions).toHaveLength(2);
 	});
 });

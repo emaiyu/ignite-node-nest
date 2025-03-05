@@ -1,6 +1,5 @@
 import type { AggregateRoot } from '../entities/aggregate-root';
 import type { UniqueEntityId } from '../entities/unique-entity-id';
-
 import type { DomainEvent } from './domain-event';
 
 type DomainEventCallback = (event: unknown) => void;
@@ -8,6 +7,8 @@ type DomainEventCallback = (event: unknown) => void;
 export class DomainEvents {
 	private static handlersMap: Record<string, DomainEventCallback[]> = {};
 	private static markedAggregates: AggregateRoot<unknown>[] = [];
+
+	public static shouldRun = true;
 
 	public static markAggregateForDispatch(
 		aggregate: AggregateRoot<unknown>,
@@ -76,6 +77,10 @@ export class DomainEvents {
 		const eventClassName: string = event.constructor.name;
 
 		const isEventRegistered = eventClassName in this.handlersMap;
+
+		if (!this.shouldRun) {
+			return;
+		}
 
 		if (isEventRegistered) {
 			const handlers = this.handlersMap[eventClassName];

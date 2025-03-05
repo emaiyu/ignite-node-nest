@@ -1,32 +1,32 @@
-import type { Either } from '@/core/either';
-import { left, right } from '@/core/either';
+import { Either, left, right } from '@/core/either';
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found';
-import type { Question } from '@/domain/forum/enterprise/entities/question';
-
 import { Injectable } from '@nestjs/common';
+import { QuestionDetails } from '../../enterprise/entities/value-objects/question-details';
 import { QuestionRepository } from '../repositories/question-repository';
 
-interface GetQuestionBySlugPayload {
+interface GetQuestionBySlugUseCaseRequest {
 	slug: string;
 }
 
-type GetQuestionBySlugResult = Either<
+type GetQuestionBySlugUseCaseResponse = Either<
 	ResourceNotFoundError,
 	{
-		question: Question;
+		question: QuestionDetails;
 	}
 >;
 
 @Injectable()
 export class GetQuestionBySlugUseCase {
-	constructor(private questionRepository: QuestionRepository) {}
+	constructor(private questionsRepository: QuestionRepository) {}
 
 	async execute({
 		slug,
-	}: GetQuestionBySlugPayload): Promise<GetQuestionBySlugResult> {
-		const question = await this.questionRepository.findBySlug(slug);
+	}: GetQuestionBySlugUseCaseRequest): Promise<GetQuestionBySlugUseCaseResponse> {
+		const question = await this.questionsRepository.findDetailsBySlug(slug);
 
-		if (!question) return left(new ResourceNotFoundError());
+		if (!question) {
+			return left(new ResourceNotFoundError());
+		}
 
 		return right({
 			question,

@@ -1,7 +1,9 @@
 import { FetchAnswerCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-answer-comments';
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
-import { ToHTTP } from '@/infra/presenters/answer-presenter';
-import { CommentPresenter } from '@/infra/presenters/comment-presenter';
+import {
+	CommentWithAuthorPresenter,
+	ToHTTP,
+} from '@/infra/presenters/comment-with-author-presenter';
 import {
 	BadRequestException,
 	Controller,
@@ -40,10 +42,10 @@ export class FetchAnswerCommentsController {
 			throw new BadRequestException();
 		}
 
-		const answerComments = result.value.answerComments;
+		const comments = result.value.comments;
 
 		return {
-			comments: answerComments.map((item) => CommentPresenter.toHTTP(item)),
+			comments: comments.map((item) => CommentWithAuthorPresenter.toHTTP(item)),
 		};
 	}
 }

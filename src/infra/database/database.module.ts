@@ -6,18 +6,22 @@ import { QuestionAttachmentRepository } from '@/domain/forum/application/reposit
 import { QuestionCommentRepository } from '@/domain/forum/application/repositories/question-comment-repository';
 import { QuestionRepository } from '@/domain/forum/application/repositories/question-repository';
 import { StudentRepository } from '@/domain/forum/application/repositories/student-repository';
+import { NotificationRepository } from '@/domain/notification/application/repositories/notification-repository';
 import { Module } from '@nestjs/common';
+import { CacheModule } from '../cache/cache.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaAnswerAttachmentRepository } from './prisma/repositories/prisma-answer-attachment-repository';
 import { PrismaAnswerCommentRepository } from './prisma/repositories/prisma-answer-comment-repository';
 import { PrismaAnswerRepository } from './prisma/repositories/prisma-answer-repository';
 import { PrismaAttachmentRepository } from './prisma/repositories/prisma-attachment-repository';
+import { PrismaNotificationsRepository } from './prisma/repositories/prisma-notification-repository';
 import { PrismaQuestionAttachmentRepository } from './prisma/repositories/prisma-question-attachment-repository';
 import { PrismaQuestionCommentRepository } from './prisma/repositories/prisma-question-comment-repository';
 import { PrismaQuestionRepository } from './prisma/repositories/prisma-question-repository';
 import { PrismaStudentRepository } from './prisma/repositories/prisma-student-repository';
 
 @Module({
+	imports: [CacheModule],
 	providers: [
 		PrismaService,
 		{
@@ -52,6 +56,10 @@ import { PrismaStudentRepository } from './prisma/repositories/prisma-student-re
 			provide: AttachmentRepository,
 			useClass: PrismaAttachmentRepository,
 		},
+		{
+			provide: NotificationRepository,
+			useClass: PrismaNotificationsRepository,
+		},
 	],
 	exports: [
 		PrismaService,
@@ -63,6 +71,7 @@ import { PrismaStudentRepository } from './prisma/repositories/prisma-student-re
 		AnswerAttachmentRepository,
 		StudentRepository,
 		AttachmentRepository,
+		NotificationRepository,
 	],
 })
 export class DatabaseModule {}

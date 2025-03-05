@@ -19,6 +19,7 @@ import { FetchRecentQuestionUseCase } from '@/domain/forum/application/use-cases
 import { GetQuestionBySlugUseCase } from '@/domain/forum/application/use-cases/get-question-by-slug';
 import { RegisterStudentUseCase } from '@/domain/forum/application/use-cases/register-student';
 import { UploadAndCreateAttachmentUseCase } from '@/domain/forum/application/use-cases/upload-and-create-attachment';
+import { ReadNotificationUseCase } from '@/domain/notification/application/use-cases/read-notification';
 import { DatabaseModule } from '../database/database.module';
 import { StorageModule } from '../store/storage.module';
 import { AnswerQuestionController } from './controllers/answer-question.controller';
@@ -39,6 +40,7 @@ import { FetchQuestionAnswersController } from './controllers/fetch-question-ans
 import { FetchQuestionCommentsController } from './controllers/fetch-question-comments.controller';
 import { FetchRecentQuestionsController } from './controllers/fetch-recent-questions.controller';
 import { GetQuestionBySlugController } from './controllers/get-question-by-slug.controller';
+import { ReadNotificationController } from './controllers/read-notificatin.controller';
 import { UploadAttachmentController } from './controllers/upload-attachment.controller';
 import { CryptographyModule } from './cryptography/cryptography.module';
 
@@ -65,6 +67,7 @@ import { CryptographyModule } from './cryptography/cryptography.module';
 		FetchQuestionCommentsController,
 		FetchAnswerCommentsController,
 		UploadAttachmentController,
+		ReadNotificationController,
 	],
 	providers: [
 		CreateQuestionUseCase,
@@ -86,6 +89,7 @@ import { CryptographyModule } from './cryptography/cryptography.module';
 		FetchQuestionCommentsUseCase,
 		FetchAnswerCommentsUseCase,
 		UploadAndCreateAttachmentUseCase,
+		ReadNotificationUseCase,
 	],
 })
 export class HttpModule {}

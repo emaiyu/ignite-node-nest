@@ -1,25 +1,32 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { NotAllowedError } from '@/core/errors/not-allowed';
-import { makeQuestion } from '@/factories/make-question';
 import { makeQuestionAttachment } from '@/factories/make-question-attachment';
+import { InMemoryAttachmentRepository } from '@/repositories/in-memory-attachment-repository';
 import { InMemoryQuestionAttachmentRepository } from '@/repositories/in-memory-question-attachment-repository';
 import { InMemoryQuestionRepository } from '@/repositories/in-memory-question-repository';
-
+import { InMemoryStudentRepository } from '@/repositories/in-memory-student-repository';
+import { makeQuestion } from 'test/factories/make-question';
 import { DeleteQuestionUseCase } from './delete-question';
 
-let questionRepository: InMemoryQuestionRepository;
-let questionAttachmentRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryQuestionsRepository: InMemoryQuestionRepository;
+let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryAttachmentsRepository: InMemoryAttachmentRepository;
+let inMemoryStudentsRepository: InMemoryStudentRepository;
 let sut: DeleteQuestionUseCase;
 
-describe('Delete Question', function () {
-	beforeEach(function () {
-		questionAttachmentRepository = new InMemoryQuestionAttachmentRepository();
-		questionRepository = new InMemoryQuestionRepository(
-			questionAttachmentRepository,
+describe('Delete Question', () => {
+	beforeEach(() => {
+		inMemoryQuestionAttachmentsRepository =
+			new InMemoryQuestionAttachmentRepository();
+		inMemoryAttachmentsRepository = new InMemoryAttachmentRepository();
+		inMemoryStudentsRepository = new InMemoryStudentRepository();
+		inMemoryQuestionsRepository = new InMemoryQuestionRepository(
+			inMemoryQuestionAttachmentsRepository,
+			inMemoryAttachmentsRepository,
+			inMemoryStudentsRepository,
 		);
-		sut = new DeleteQuestionUseCase(questionRepository);
+
+		sut = new DeleteQuestionUseCase(inMemoryQuestionsRepository);
 	});
 
 	it('should be able to delete a question', async () => {
@@ -30,9 +37,9 @@ describe('Delete Question', function () {
 			new UniqueEntityId('question-1'),
 		);
 
-		await questionRepository.create(newQuestion);
+		await inMemoryQuestionsRepository.create(newQuestion);
 
-		questionAttachmentRepository.items.push(
+		inMemoryQuestionAttachmentsRepository.items.push(
 			makeQuestionAttachment({
 				questionId: newQuestion.id,
 				attachmentId: new UniqueEntityId('1'),
@@ -48,8 +55,8 @@ describe('Delete Question', function () {
 			authorId: 'author-1',
 		});
 
-		expect(questionRepository.items).toHaveLength(0);
-		expect(questionAttachmentRepository.items).toHaveLength(0);
+		expect(inMemoryQuestionsRepository.items).toHaveLength(0);
+		expect(inMemoryQuestionAttachmentsRepository.items).toHaveLength(0);
 	});
 
 	it('should not be able to delete a question from another user', async () => {
@@ -60,14 +67,7 @@ describe('Delete Question', function () {
 			new UniqueEntityId('question-1'),
 		);
 
-		await questionRepository.create(newQuestion);
-
-		// await expect(function () {
-		// 	return sut.execute({
-		// 		questionId: 'question-1',
-		// 		authorId: 'author-2',
-		// 	});
-		// }).rejects.toBeInstanceOf(Error);
+		await inMemoryQuestionsRepository.create(newQuestion);
 
 		const result = await sut.execute({
 			questionId: 'question-1',

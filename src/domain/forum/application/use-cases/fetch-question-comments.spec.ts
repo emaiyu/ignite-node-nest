@@ -1,53 +1,90 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
-import { makeQuestionComment } from '@/factories/make-question-comment';
+import { FetchQuestionCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-question-comments';
 import { InMemoryQuestionCommentRepository } from '@/repositories/in-memory-question-comment-repository';
+import { InMemoryStudentRepository } from '@/repositories/in-memory-student-repository';
+import { makeQuestionComment } from 'test/factories/make-question-comment';
+import { makeStudent } from 'test/factories/make-student';
 
-import { FetchQuestionCommentsUseCase } from './fetch-question-comments';
-
-let questionCommentRepository: InMemoryQuestionCommentRepository;
+let inMemoryStudentsRepository: InMemoryStudentRepository;
+let inMemoryQuestionCommentsRepository: InMemoryQuestionCommentRepository;
 let sut: FetchQuestionCommentsUseCase;
 
-describe('Fetch Question Comments', function () {
-	beforeEach(function () {
-		questionCommentRepository = new InMemoryQuestionCommentRepository();
-		sut = new FetchQuestionCommentsUseCase(questionCommentRepository);
+describe('Fetch Question Comments', () => {
+	beforeEach(() => {
+		inMemoryStudentsRepository = new InMemoryStudentRepository();
+		inMemoryQuestionCommentsRepository = new InMemoryQuestionCommentRepository(
+			inMemoryStudentsRepository,
+		);
+		sut = new FetchQuestionCommentsUseCase(inMemoryQuestionCommentsRepository);
 	});
 
 	it('should be able to fetch question comments', async () => {
-		await questionCommentRepository.create(
-			makeQuestionComment({ questionId: new UniqueEntityId('question-id') }),
-		);
-		await questionCommentRepository.create(
-			makeQuestionComment({ questionId: new UniqueEntityId('question-id') }),
-		);
-		await questionCommentRepository.create(
-			makeQuestionComment({ questionId: new UniqueEntityId('question-id') }),
-		);
+		const student = makeStudent({ name: 'John Doe' });
+
+		inMemoryStudentsRepository.items.push(student);
+
+		const comment1 = makeQuestionComment({
+			questionId: new UniqueEntityId('question-1'),
+			authorId: student.id,
+		});
+
+		const comment2 = makeQuestionComment({
+			questionId: new UniqueEntityId('question-1'),
+			authorId: student.id,
+		});
+
+		const comment3 = makeQuestionComment({
+			questionId: new UniqueEntityId('question-1'),
+			authorId: student.id,
+		});
+
+		await inMemoryQuestionCommentsRepository.create(comment1);
+		await inMemoryQuestionCommentsRepository.create(comment2);
+		await inMemoryQuestionCommentsRepository.create(comment3);
 
 		const result = await sut.execute({
-			questionId: 'question-id',
+			questionId: 'question-1',
 			page: 1,
 		});
 
-		expect(result.isRight()).toBe(true);
-		expect(result.value?.questionComments).toHaveLength(3);
+		expect(result.value?.comments).toHaveLength(3);
+		expect(result.value?.comments).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					author: 'John Doe',
+					commentId: comment1.id,
+				}),
+				expect.objectContaining({
+					author: 'John Doe',
+					commentId: comment2.id,
+				}),
+				expect.objectContaining({
+					author: 'John Doe',
+					commentId: comment3.id,
+				}),
+			]),
+		);
 	});
 
 	it('should be able to fetch paginated question comments', async () => {
+		const student = makeStudent({ name: 'John Doe' });
+
+		inMemoryStudentsRepository.items.push(student);
+
 		for (let i = 1; i <= 22; i++) {
-			await questionCommentRepository.create(
-				makeQuestionComment({ questionId: new UniqueEntityId('question-id') }),
+			await inMemoryQuestionCommentsRepository.create(
+				makeQuestionComment({
+					questionId: new UniqueEntityId('question-1'),
+					authorId: student.id,
+				}),
 			);
 		}
 
 		const result = await sut.execute({
-			questionId: 'question-id',
+			questionId: 'question-1',
 			page: 2,
 		});
 
-		expect(result.isRight()).toBe(true);
-		expect(result.value?.questionComments).toHaveLength(2);
+		expect(result.value?.comments).toHaveLength(2);
 	});
 });

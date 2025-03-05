@@ -1,25 +1,34 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id';
 import { NotAllowedError } from '@/core/errors/not-allowed';
+import { makeQuestion } from '@/factories/make-question';
 import { makeQuestionAttachment } from '@/factories/make-question-attachment';
+import { InMemoryAttachmentRepository } from '@/repositories/in-memory-attachment-repository';
 import { InMemoryQuestionAttachmentRepository } from '@/repositories/in-memory-question-attachment-repository';
 import { InMemoryQuestionRepository } from '@/repositories/in-memory-question-repository';
-import { makeQuestion } from 'test/factories/make-question';
+import { InMemoryStudentRepository } from '@/repositories/in-memory-student-repository';
 import { EditQuestionUseCase } from './edit-question';
 
-let questionRepository: InMemoryQuestionRepository;
-let questionAttachmentRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryQuestionsRepository: InMemoryQuestionRepository;
+let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryAttachmentsRepository: InMemoryAttachmentRepository;
+let inMemoryStudentsRepository: InMemoryStudentRepository;
 let sut: EditQuestionUseCase;
 
 describe('Edit Question', () => {
 	beforeEach(() => {
-		questionAttachmentRepository = new InMemoryQuestionAttachmentRepository();
-		questionRepository = new InMemoryQuestionRepository(
-			questionAttachmentRepository,
+		inMemoryQuestionAttachmentsRepository =
+			new InMemoryQuestionAttachmentRepository();
+		inMemoryAttachmentsRepository = new InMemoryAttachmentRepository();
+		inMemoryStudentsRepository = new InMemoryStudentRepository();
+		inMemoryQuestionsRepository = new InMemoryQuestionRepository(
+			inMemoryQuestionAttachmentsRepository,
+			inMemoryAttachmentsRepository,
+			inMemoryStudentsRepository,
 		);
 
 		sut = new EditQuestionUseCase(
-			questionRepository,
-			questionAttachmentRepository,
+			inMemoryQuestionsRepository,
+			inMemoryQuestionAttachmentsRepository,
 		);
 	});
 
@@ -31,9 +40,9 @@ describe('Edit Question', () => {
 			new UniqueEntityId('question-1'),
 		);
 
-		await questionRepository.create(newQuestion);
+		await inMemoryQuestionsRepository.create(newQuestion);
 
-		questionAttachmentRepository.items.push(
+		inMemoryQuestionAttachmentsRepository.items.push(
 			makeQuestionAttachment({
 				questionId: newQuestion.id,
 				attachmentId: new UniqueEntityId('1'),
@@ -52,15 +61,17 @@ describe('Edit Question', () => {
 			attachmentsId: ['1', '3'],
 		});
 
-		expect(questionRepository.items[0]).toMatchObject({
+		expect(inMemoryQuestionsRepository.items[0]).toMatchObject({
 			title: 'Pergunta teste',
 			content: 'Conteúdo teste',
 		});
 
-		expect(questionRepository.items[0].attachments.currentItems).toHaveLength(
-			2,
-		);
-		expect(questionRepository.items[0].attachments.currentItems).toEqual([
+		expect(
+			inMemoryQuestionsRepository.items[0].attachments.currentItems,
+		).toHaveLength(2);
+		expect(
+			inMemoryQuestionsRepository.items[0].attachments.currentItems,
+		).toEqual([
 			expect.objectContaining({ attachmentId: new UniqueEntityId('1') }),
 			expect.objectContaining({ attachmentId: new UniqueEntityId('3') }),
 		]);
@@ -74,7 +85,7 @@ describe('Edit Question', () => {
 			new UniqueEntityId('question-1'),
 		);
 
-		await questionRepository.create(newQuestion);
+		await inMemoryQuestionsRepository.create(newQuestion);
 
 		const result = await sut.execute({
 			questionId: newQuestion.id.toValue(),
@@ -96,9 +107,9 @@ describe('Edit Question', () => {
 			new UniqueEntityId('question-1'),
 		);
 
-		await questionRepository.create(newQuestion);
+		await inMemoryQuestionsRepository.create(newQuestion);
 
-		questionAttachmentRepository.items.push(
+		inMemoryQuestionAttachmentsRepository.items.push(
 			makeQuestionAttachment({
 				questionId: newQuestion.id,
 				attachmentId: new UniqueEntityId('1'),
@@ -118,8 +129,8 @@ describe('Edit Question', () => {
 		});
 
 		expect(result.isRight()).toBe(true);
-		expect(questionAttachmentRepository.items).toHaveLength(2);
-		expect(questionAttachmentRepository.items).toEqual(
+		expect(inMemoryQuestionAttachmentsRepository.items).toHaveLength(2);
+		expect(inMemoryQuestionAttachmentsRepository.items).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
 					attachmentId: new UniqueEntityId('1'),

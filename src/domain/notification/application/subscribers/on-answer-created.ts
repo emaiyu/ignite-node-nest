@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { DomainEvents } from '@/core/events/domain-events';
-import type { EventHandler } from '@/core/events/event-handler';
-import type { QuestionRepository } from '@/domain/forum/application/repositories/question-repository';
+import { EventHandler } from '@/core/events/event-handler';
+import { QuestionRepository } from '@/domain/forum/application/repositories/question-repository';
 import { AnswerCreatedEvent } from '@/domain/forum/enterprise/events/answer-created-event';
+import { SendNotificationUseCase } from '@/domain/notification/application/use-cases/send-notification';
+import { Injectable } from '@nestjs/common';
 
-import type { SendNotificationUseCase } from '../use-cases/send-notification';
-
+@Injectable()
 export class OnAnswerCreated implements EventHandler {
 	constructor(
-		private questionRepository: QuestionRepository,
+		private questionsRepository: QuestionRepository,
 		private sendNotification: SendNotificationUseCase,
 	) {
 		this.setupSubscriptions();
@@ -24,17 +25,16 @@ export class OnAnswerCreated implements EventHandler {
 	private async sendNewAnswerNotification({
 		answer,
 	}: AnswerCreatedEvent): Promise<void> {
-		// console.log('sendNewAnswerNotification', answer);
-		const question = await this.questionRepository.findById(
+		const question = await this.questionsRepository.findById(
 			answer.questionId.toString(),
 		);
 
 		if (question) {
 			await this.sendNotification.execute({
 				recipientId: question.authorId.toString(),
-				title: 'Novo resposta '
-					.concat(question.title.substring(0, 40))
-					.concat('...'),
+				title: `Nova resposta em "${question.title
+					.substring(0, 40)
+					.concat('...')}"`,
 				content: answer.excerpt,
 			});
 		}

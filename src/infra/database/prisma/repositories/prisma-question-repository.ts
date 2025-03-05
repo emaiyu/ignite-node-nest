@@ -1,8 +1,15 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { DomainEvents } from '@/core/events/domain-events';
 import { PaginationParams } from '@/core/repositories/paginate-params';
 import { QuestionAttachmentRepository } from '@/domain/forum/application/repositories/question-attachment-repository';
 import { QuestionRepository } from '@/domain/forum/application/repositories/question-repository';
 import { Question } from '@/domain/forum/enterprise/entities/question';
+import { QuestionDetails } from '@/domain/forum/enterprise/entities/value-objects/question-details';
+import { CacheRepository } from '@/infra/cache/cache-repository';
 import { Injectable } from '@nestjs/common';
+import { PrismaQuestionDetailsMapper } from '../mappers/prisma-question-details-mapper';
 import { PrismaQuestionMapper } from '../mappers/prisma-question-mapper';
 import { PrismaService } from '../prisma.service';
 
@@ -10,7 +17,8 @@ import { PrismaService } from '../prisma.service';
 export class PrismaQuestionRepository implements QuestionRepository {
 	constructor(
 		private prisma: PrismaService,
-		private questionAttachmentRepository: QuestionAttachmentRepository,
+		private questionAttachmentsRepository: QuestionAttachmentRepository,
+		private cache: CacheRepository,
 	) {}
 
 	async findById(id: string): Promise<Question | null> {
@@ -27,10 +35,22 @@ export class PrismaQuestionRepository implements QuestionRepository {
 		return PrismaQuestionMapper.toDomain(question);
 	}
 
-	async findBySlug(slug: string): Promise<Question | null> {
+	async findBySlug(slug: string) {
+		const cacheHit = await this.cache.get(`question:${slug}:details`);
+
+		if (cacheHit) {
+			const cacheData = JSON.parse(cacheHit);
+
+			return cacheData;
+		}
+
 		const question = await this.prisma.question.findUnique({
 			where: {
 				slug,
+			},
+			include: {
+				author: true,
+				attachments: true,
 			},
 		});
 
@@ -38,7 +58,32 @@ export class PrismaQuestionRepository implements QuestionRepository {
 			return null;
 		}
 
-		return PrismaQuestionMapper.toDomain(question);
+		const questionDetails = PrismaQuestionDetailsMapper.toDomain(question);
+
+		await this.cache.set(
+			`question:${slug}:details`,
+			JSON.stringify(questionDetails),
+		);
+
+		return questionDetails;
+	}
+
+	async findDetailsBySlug(slug: string): Promise<QuestionDetails | null> {
+		const question = await this.prisma.question.findUnique({
+			where: {
+				slug,
+			},
+			include: {
+				author: true,
+				attachments: true,
+			},
+		});
+
+		if (!question) {
+			return null;
+		}
+
+		return PrismaQuestionDetailsMapper.toDomain(question);
 	}
 
 	async findManyRecent({ page }: PaginationParams): Promise<Question[]> {
@@ -60,9 +105,11 @@ export class PrismaQuestionRepository implements QuestionRepository {
 			data,
 		});
 
-		await this.questionAttachmentRepository.createMany(
+		await this.questionAttachmentsRepository.createMany(
 			question.attachments.getItems(),
 		);
+
+		DomainEvents.dispatchEventsForAggregate(question.id);
 	}
 
 	async save(question: Question): Promise<void> {
@@ -75,13 +122,16 @@ export class PrismaQuestionRepository implements QuestionRepository {
 				},
 				data,
 			}),
-			this.questionAttachmentRepository.createMany(
+			this.questionAttachmentsRepository.createMany(
 				question.attachments.getNewItems(),
 			),
-			this.questionAttachmentRepository.deleteMany(
+			this.questionAttachmentsRepository.deleteMany(
 				question.attachments.getRemovedItems(),
 			),
+			this.cache.delete(`question:${data.slug}:details`),
 		]);
+
+		DomainEvents.dispatchEventsForAggregate(question.id);
 	}
 
 	async delete(question: Question): Promise<void> {

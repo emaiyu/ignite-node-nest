@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { DomainEvents } from '@/core/events/domain-events';
-import type { EventHandler } from '@/core/events/event-handler';
-import type { AnswerRepository } from '@/domain/forum/application/repositories/answer-repository';
+import { EventHandler } from '@/core/events/event-handler';
+import { AnswerRepository } from '@/domain/forum/application/repositories/answer-repository';
 import { QuestionBestAnswerChosenEvent } from '@/domain/forum/enterprise/events/question-best-answer-chosen';
+import { SendNotificationUseCase } from '@/domain/notification/application/use-cases/send-notification';
+import { Injectable } from '@nestjs/common';
 
-import type { SendNotificationUseCase } from '../use-cases/send-notification';
-
-export class OnQuestionBestAnswerChose implements EventHandler {
+@Injectable()
+export class OnQuestionBestAnswerChosen implements EventHandler {
 	constructor(
-		private answerRepository: AnswerRepository,
+		private answersRepository: AnswerRepository,
 		private sendNotification: SendNotificationUseCase,
 	) {
 		this.setupSubscriptions();
@@ -25,17 +26,17 @@ export class OnQuestionBestAnswerChose implements EventHandler {
 		question,
 		bestAnswerId,
 	}: QuestionBestAnswerChosenEvent): Promise<void> {
-		const answer = await this.answerRepository.findById(
+		const answer = await this.answersRepository.findById(
 			bestAnswerId.toString(),
 		);
 
 		if (answer) {
 			await this.sendNotification.execute({
 				recipientId: answer.authorId.toString(),
-				title: 'Sua resposta foi escolhida!',
-				content: 'A reposta que voce enviou em '
-					.concat(question.title.substring(0, 20).concat('...'))
-					.concat(' foi escolhida pelo autor!'),
+				title: `Sua resposta foi escolhida!`,
+				content: `A resposta que você enviou em "${question.title
+					.substring(0, 20)
+					.concat('...')}" foi escolhida pelo autor!"`,
 			});
 		}
 	}
